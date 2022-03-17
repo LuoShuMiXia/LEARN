@@ -69,7 +69,43 @@ int numMine(char mine[ROWS][COLS],  int x, int y)
 		mine[x + 1][y - 1] +
 		mine[x + 1][y] +
 		mine[x + 1][y + 1] -
-		7 * '0';
+		8 * '0';
+}
+
+void expand(char mine[ROWS][COLS], char show[ROWS][COLS], int x, int y, int* win)
+{
+	
+	
+		int i = 0;
+		int j = 0;
+		for (i = -1; i < 2; i++)
+		{
+			for (j = -1; j < 2; j++)
+			{
+				if (i != 0 || j != 0)
+				{
+					if (x + i >= 1 && x + i <= ROW && y + j >= 1 && y + j <= COL)
+					{
+						if (mine[x + i][y + j] == '0' && show[x + i][y + j] == '*')
+						{
+							int count = numMine(mine, x + i, y + j);
+							if (count != 0)
+							{
+								show[x + i][y + j] = count + '0';
+								(*win)++;
+							}
+							else
+							{
+								show[x + i][y + j] ='0';
+								(*win)++;
+								expand(mine, show, x + i, y + j, win);
+							}
+						}
+					}
+				}
+			}
+		}
+	
 }
 
 void findMine(char mine[ROWS][COLS], char show[ROWS][COLS], int row, int col)
@@ -85,18 +121,30 @@ void findMine(char mine[ROWS][COLS], char show[ROWS][COLS], int row, int col)
 		{
 			if (mine[x][y] == '1')
 			{
+
 				printf("这里有地雷，爆炸了！！\n");
 				board(mine, ROW, COL);
 				break;
 			}
 			else
 			{
-				show[x][y]=numMine(mine, x, y);
+				int ret = numMine(mine, x, y);
+				if (ret != 0)
+				{
+					show[x][y] = ret + '0';
+					win++;
+				}
+				else
+				{
+					show[x][y] = ret + '0';
+					win++;
+					expand(mine, show, x, y, &win);
+				}
 				board(show, ROW, COL);
-				win++;
 			}
 			if (win == row * col - MINE)
 				printf("恭喜你，扫雷成功！\n");
+			board(mine, ROW, COL);
 		}
 		else
 		{
